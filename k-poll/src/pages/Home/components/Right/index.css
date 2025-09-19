@@ -1,0 +1,28 @@
+.container-right {
+    position: absolute;
+    top: 32px;
+    right: 0;
+    width: 60px;
+    height: 90%; 
+    background: #e9d8b4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 8px #dfa319;
+}
+.right-btn {
+    width: 48px;
+    height: 48px;
+    background: #e9d8b4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: transform 0.2s ease-in-out;
+}
+.right-btn:hover {
+    background: #dfa319;
+}

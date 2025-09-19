@@ -1,0 +1,5 @@
+.container-calculator {
+    border: 2px solid #ccc;
+    height: 100%; /* 让内容高度随父容器变化 */
+    box-sizing: border-box; /* 保证border不会溢出 */
+}

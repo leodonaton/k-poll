@@ -1,0 +1,67 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #f0f0f0; 
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wax-seal {
+  position: relative;
+  z-index: 10;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #db6832; 
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 4px 8px rgba(224, 188, 111, 0.463);
+  transition: transform 0.2s ease-in-out;
+}
+
+.wax-seal:hover {
+  transform: scale(1.1);
+}
+
+.envelope {
+  background: rgba(224, 188, 111, 0.463); 
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
+.envelope-flap {
+  width: 100%;
+  height: 100%;
+  transform-origin: top;
+  transition: transform 1s cubic-bezier(0.25, 0.8, 0.25, 1); 
+  will-change: transform;
+}
+
+.content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  align-items: center;
+  text-align: center;
+}
