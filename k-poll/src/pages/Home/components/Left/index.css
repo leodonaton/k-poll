@@ -115,3 +115,18 @@
   font-size: 18px;
   transition: transform 0.2s ease-in-out;
 }
+
+.subscribe-btn{
+  width:30px;
+  height:30px;
+  background:transparent;
+  border:none;
+  color:#dfa319;
+  cursor:pointer; 
+}
+
+.subscribe-btn:hover{
+  background:#dfa319;
+  color:white;
+  border-radius:10%;
+}
