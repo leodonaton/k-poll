@@ -2,14 +2,64 @@ import React, { useContext, useState, useRef, useEffect } from 'react'
 import './index.css'
 import { LayoutContext } from '../../LayoutContext'
 import { Tooltip } from 'antd'
-import { BranchesOutlined,HolderOutlined,StarOutlined,DatabaseOutlined, RightOutlined, LeftOutlined, FormatPainterOutlined, HighlightOutlined, InsertRowLeftOutlined } from '@ant-design/icons'
+import { BranchesOutlined, HolderOutlined, StarOutlined, DatabaseOutlined, RightOutlined, LeftOutlined, FormatPainterOutlined, HighlightOutlined, InsertRowLeftOutlined } from '@ant-design/icons'
 
 const menuData_of_note = [
-  { title: '编辑', label: <HighlightOutlined />, menu: [<FormatPainterOutlined />, '2', '3', '4', '5'] },
-  { title: '插入', label: <InsertRowLeftOutlined />, menu: [<InsertRowLeftOutlined />, '2', '3', '4', '5'] },
-  { title: '思维导图', label: <BranchesOutlined />, menu: [<BranchesOutlined />, '2', '3', '4', '5'] },
-  { title: '知识卡片', label: <DatabaseOutlined />, menu: [<DatabaseOutlined />, '2', '3', '4', '5'] },
-  { title: '5', label: <FormatPainterOutlined />, menu: [<FormatPainterOutlined />, '2', '3', '4', '5'] }
+  {
+    title: '编辑',
+    label: <HighlightOutlined />,
+    menu: [
+      { title: '高亮', label: <HighlightOutlined /> },
+      { title: '格式刷', label: <FormatPainterOutlined /> },
+      { title: '功能3', label: <FormatPainterOutlined /> },
+      { title: '功能4', label: <FormatPainterOutlined /> },
+      { title: '功能5', label: <FormatPainterOutlined /> }
+    ]
+  },
+  {
+    title: '插入',
+    label: <InsertRowLeftOutlined />,
+    menu: [
+      { title: '插入行', label: <InsertRowLeftOutlined /> },
+      { title: '功能2', label: <InsertRowLeftOutlined /> },
+      { title: '功能3', label: <InsertRowLeftOutlined /> },
+      { title: '功能4', label: <InsertRowLeftOutlined /> },
+      { title: '功能5', label: <InsertRowLeftOutlined /> }
+    ]
+  },
+  {
+    title: '思维导图',
+    label: <BranchesOutlined />,
+    menu: [
+      { title: '思维导图', label: <BranchesOutlined /> },
+      { title: '功能2', label: <BranchesOutlined /> },
+      { title: '功能3', label: <BranchesOutlined /> },
+      { title: '功能4', label: <BranchesOutlined /> },
+      { title: '功能5', label: <BranchesOutlined /> }
+    ]
+  },
+  {
+    title: '知识卡片',
+    label: <DatabaseOutlined />,
+    menu: [
+      { title: '知识卡片', label: <DatabaseOutlined /> },
+      { title: '功能2', label: <DatabaseOutlined /> },
+      { title: '功能3', label: <DatabaseOutlined /> },
+      { title: '功能4', label: <DatabaseOutlined /> },
+      { title: '功能5', label: <DatabaseOutlined /> }
+    ]
+  },
+  {
+    title: '5',
+    label: <FormatPainterOutlined />,
+    menu: [
+      { title: '功能5', label: <FormatPainterOutlined /> },
+      { title: '功能2', label: <FormatPainterOutlined /> },
+      { title: '功能3', label: <FormatPainterOutlined /> },
+      { title: '功能4', label: <FormatPainterOutlined /> },
+      { title: '功能5', label: <FormatPainterOutlined /> }
+    ]
+  }
 ]
 
 const initialSelectedMenuList = Array(menuData_of_note.length).fill(0).map((_, idx) => ({
@@ -23,6 +73,7 @@ function FloatingSubscribeBar({ subscribeList, setSubscribeList, handleMenuBtnCl
   const [dragging, setDragging] = useState(false)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const [dragIdx, setDragIdx] = useState(null)
+  const { activefunctionbutton } = useContext(LayoutContext)
 
   useEffect(() => {
     function handleMouseMove(e) {
@@ -101,30 +152,36 @@ function FloatingSubscribeBar({ subscribeList, setSubscribeList, handleMenuBtnCl
       >
         <HolderOutlined style={{ fontSize: 20, color: '#dcb251' }} />
       </span>
-      {( subscribeList.length > 0) ? (
-        subscribeList.map((item, idx) => (
-          <div
-            key={idx}
-            draggable
-            onDragStart={handleDragStart(idx)}
-            onDragOver={handleDragOver(idx)}
-            onDrop={handleDrop(idx)}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              opacity: dragIdx === idx ? 0.5 : 1
-            }}
-          >
-            <button
-              className='subscribe-btn'
-              style={{ fontSize: 18 }}
-              onClick={() => handleMenuBtnClick(item.parentIdx, item.menuIdx, true)}
+      {(subscribeList.length > 0) ? (
+        subscribeList.map((item, idx) => {
+          // 判断是否高亮
+          const isActive = item.m && item.m.title === activefunctionbutton
+          return (
+            <div
+              key={idx}
+              draggable
+              onDragStart={handleDragStart(idx)}
+              onDragOver={handleDragOver(idx)}
+              onDrop={handleDrop(idx)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                opacity: dragIdx === idx ? 0.5 : 1
+              }}
             >
-              {item.m}
-            </button>
-          </div>
-        ))
+              <button
+                className={`subscribe-btn${isActive ? ' active-menu-item' : ''}`}
+                style={{ fontSize: 18 }}
+                onClick={() => handleMenuBtnClick(item.parentIdx, item.menuIdx, true)}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {item.m.label}
+                </span>
+              </button>
+            </div>
+          )
+        })
       ) : null}
     </div>
   )
@@ -135,8 +192,12 @@ export default function Left() {
   const [selectedMenuList, setSelectedMenuList] = useState(initialSelectedMenuList)
   const menuRef = useRef(null)
   const {
-    showNote, showCodeEditor, showSubjectCards, subscribe,subscribeList, 
-    setShowNote, setShowCodeEditor, setShowSubjectCards, setSubscribe,setSubscribeList,
+    showNote, setShowNote,
+    showCodeEditor, setShowCodeEditor,
+    showSubjectCards, setShowSubjectCards,
+    subscribe, setSubscribe,
+    subscribeList, setSubscribeList,
+    activefunctionbutton, setActivefunctionbutton
   } = useContext(LayoutContext)
 
   const handlesubscribe = () => {
@@ -150,10 +211,10 @@ export default function Left() {
       const exists = prevList.some(item => item.menuIdx === menuIdx && item.parentIdx === parentIdx)
       const newList = exists
         ? prevList.filter(item => !(item.menuIdx === menuIdx && item.parentIdx === parentIdx))
-        : [...prevList, { m, menuIdx, parentIdx }] 
+        : [...prevList, { m, menuIdx, parentIdx }]
       return newList
     })
-  } 
+  }
 
 
   useEffect(() => {
@@ -167,15 +228,25 @@ export default function Left() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [activeMenu])
 
-  // 切换某组 idx 的 menuIdx
+  useEffect(() => {
+    function handleRightClick(e) {
+      if (activefunctionbutton) {
+        e.preventDefault()
+        setActivefunctionbutton(null)
+      }
+    }
+    document.addEventListener('contextmenu', handleRightClick)
+    return () => document.removeEventListener('contextmenu', handleRightClick)
+  }, [activefunctionbutton])
+
   const handleMenuBtnClick = (parentIdx, menuIdx, isSubscribed) => {
     setSelectedMenuList(prev =>
       prev.map(item =>
         item.idx === parentIdx ? { ...item, menuIdx } : item
       )
     )
-    // 可选：根据 isSubscribed 做订阅相关处理
-    // if (isSubscribed) { ... }
+    // 传递当前子功能title到activefunctionbutton
+    setActivefunctionbutton(menuData_of_note[parentIdx].menu[menuIdx].title)
   }
 
   return (
@@ -194,11 +265,13 @@ export default function Left() {
             }}
           />
           {menuData_of_note.map((item, idx) => {
-            const selected = selectedMenuList.find(v => v.idx === idx)
+            const selected_notemenu = selectedMenuList.find(v => v.idx === idx)
             return (
               <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
                 <button className='left-btn'>
-                  {selected ? item.menu[selected.menuIdx] : item.label}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {selected_notemenu ? selected_notemenu.m = item.menu[selected_notemenu.menuIdx].label : item.label}
+                  </span>
                 </button>
                 <div
                   onClick={() => setActiveMenu(activeMenu === idx ? null : idx)}
@@ -212,22 +285,30 @@ export default function Left() {
                   <div className="left-menu-popup" style={{ top: 0, left: '100%' }}>
                     {item.menu.map((m, i) => {
                       const isSubscribed = subscribeList.some(v => v.menuIdx === i && v.parentIdx === idx)
+                      const isActive = activefunctionbutton === m.title
                       return (
-                        <div key={i} className='left-menu-item-container'>
+                        <div
+                          key={i}
+                          className={`left-menu-item-container${isActive ? ' active-menu-item' : ''}`}
+                        >
                           <button
                             className='left-menu-btn'
                             onClick={() => handleMenuBtnClick(idx, i, isSubscribed)}
                           >
-                            {m}
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              {m.label}
+                              <span>{m.title}</span>
+                            </span>
                           </button>
                           <button
-                            className='left-menu-btn'
+                            className={`left-menu-btn star-btn${isSubscribed ? ' subscribed' : ''}`}
                             style={{
-                              width:'30px',
-                              height:'30px',
-                              marginTop:'10px',
-                              textAlign:'center', 
-                              background: isSubscribed ? '#f2a900' : undefined}}
+                              width: '30px',
+                              height: '30px',
+                              marginTop: '10px',
+                              textAlign: 'center',
+                              background: isSubscribed ? '#f2a900' : undefined
+                            }}
                             onClick={handleAddSubscribe(m, i, idx)}
                           >
                             <StarOutlined />

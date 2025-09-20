@@ -1,9 +1,9 @@
 .container-screen {
 	position: absolute;
-	top: 32px;   
-	left: 62px;   
-	right: 60px;  
-	bottom: 60px;  
+	top: 32px;
+	left: 62px;
+	right: 60px;
+	bottom: 60px;
 	width: auto;
 	height: auto;
 	background: rgb(233, 216, 180);
@@ -13,23 +13,57 @@
 
 /* 自定义竖直和水平滚动条样式 */
 .container-screen::-webkit-scrollbar {
-  width: 8px;      /* 竖直滚动条宽度 */
-  height: 8px;     /* 水平滚动条高度 */
+	width: 8px;
+	/* 竖直滚动条宽度 */
+	height: 8px;
+	/* 水平滚动条高度 */
 }
 
 .container-screen::-webkit-scrollbar-thumb {
-  background: #e9d8b4; 
-  border-radius: 2px;
+	background: #e9d8b4;
+	border-radius: 2px;
 }
 
 .container-screen::-webkit-scrollbar-track {
-  background: #e4be6b; 
-  border-radius: 2px;
+	background: #e4be6b;
+	border-radius: 2px;
 }
 
-/* Firefox 支持 */
 .container-screen {
-  scrollbar-width: thin;
-  scrollbar-color: #e9d8b4 #e4be6b;
+	scrollbar-width: thin;
+	scrollbar-color: #e9d8b4 #e4be6b;
 }
 
+.ant-splitter-bar {
+	width: 2px !important;
+	background: #dfa319 !important;
+	border-radius: 4px;
+	transition: background 0.2s;
+	cursor: col-resize;
+}
+
+.ant-splitter-bar:hover {
+	background: #f2a900 !important;
+}
+
+.ant-splitter-bar-dragger::before {
+	background: #e0b95d !important;
+}
+
+.ant-splitter-bar-collapse-bar.ant-splitter-bar-collapse-bar-start {
+	color: #fff !important;
+	background: #e0b95d !important;
+}
+
+.ant-splitter-bar-collapse-bar .ant-splitter-bar-collapse-bar-start::after {
+	background: #dfa522 !important;
+}
+
+.ant-splitter-bar-collapse-bar.ant-splitter-bar-collapse-bar-end {
+	color: #fff !important;
+	background: #e0b95d !important;
+}
+
+.ant-splitter-bar-collapse-bar .ant-splitter-bar-collapse-bar-end::after {
+	background: #dfa522 !important;
+}

@@ -12,9 +12,11 @@ const Home = () => {
   const [showSubjectCards, setShowSubjectCards] = useState(false);
   const [subscribe, setSubscribe] = useState(false);
   const [subscribeList, setSubscribeList] = useState([]);
+  const [activefunctionbutton, setActivefunctionbutton] = useState(null);
   return (
     <div className="home">
       <LayoutContext.Provider value={{
+        activefunctionbutton, setActivefunctionbutton,
         subscribe, setSubscribe,
         subscribeList, setSubscribeList,
         showNote, setShowNote,

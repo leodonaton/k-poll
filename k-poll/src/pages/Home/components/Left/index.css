@@ -95,6 +95,17 @@
   color:white;
 }
 
+.star-btn {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.left-menu-item-container:hover .star-btn {
+  opacity: 1;
+}
+.star-btn.subscribed {
+  opacity: 1;
+}
+
 
 .bottom-button-container {
   margin-top: auto;
@@ -129,4 +140,8 @@
   background:#dfa319;
   color:white;
   border-radius:10%;
+}
+
+.active-menu-item {
+  background: #ffe58f !important;
 }

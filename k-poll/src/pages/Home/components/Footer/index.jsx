@@ -4,14 +4,13 @@ import { LayoutContext } from '../../LayoutContext'
 import { Tooltip } from 'antd'
 import { FormOutlined, CodeOutlined, BookOutlined } from '@ant-design/icons'
 
-const menuData = [
 
-]
 export default function Footer() {
   const [showMenu, setShowMenu] = useState(null)
   const {
     showNote, showCodeEditor, showSubjectCards,
-    setShowNote, setShowCodeEditor, setShowSubjectCards
+    setShowNote, setShowCodeEditor, setShowSubjectCards,
+    activefunctionbutton
   } = useContext(LayoutContext)
   return (
     <div className='container-footer'>
@@ -31,7 +30,13 @@ export default function Footer() {
         <BookOutlined /> <span style={{fontSize: '14px'}}>知识卡片</span>
       </button>
 
-
+      <div className="dynamic-island">
+        {activefunctionbutton && (
+          <span className="island-text">
+            {activefunctionbutton}
+          </span>
+        )}
+      </div>
 
       <button className='footer-right-btn'>5</button>
       <button className='footer-right-btn'>6</button>
@@ -47,13 +52,13 @@ export default function Footer() {
 
       {showMenu === 'codeEditor' && (
         <div className='footer-menu-popup' style={{ left: '100px' }} onMouseLeave={() => setShowMenu(null)}>
-          <button className='footer-menu-btn'>代码编辑器</button>
+          <button className='footer-menu-btn' onClick={() => setShowCodeEditor(!showCodeEditor)}>代码编辑器</button>
         </div>
       )}
 
       {showMenu === 'subjectCards' && (
         <div className='footer-menu-popup' style={{ left: '210px' }} onMouseLeave={() => setShowMenu(null)}>
-          <button className='footer-menu-btn'>知识卡片</button>
+          <button className='footer-menu-btn' onClick={() => setShowSubjectCards(!showSubjectCards)}>知识卡片</button>
         </div>
       )}
     </div>
