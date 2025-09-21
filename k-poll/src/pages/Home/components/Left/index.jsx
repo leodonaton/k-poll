@@ -268,7 +268,7 @@ export default function Left() {
             const selected_notemenu = selectedMenuList.find(v => v.idx === idx)
             return (
               <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-                <button className='left-btn'>
+                <button className='left-btn'> 
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {selected_notemenu ? selected_notemenu.m = item.menu[selected_notemenu.menuIdx].label : item.label}
                   </span>

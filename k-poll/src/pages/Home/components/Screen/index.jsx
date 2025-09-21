@@ -8,12 +8,12 @@ import './index.css'
 
 export default function Screen() {
   const {
-    showNote, showCodeEditor, showSubjectCards, activefunctionbutton, setActivefunctionbutton
-
+    showNote, showCodeEditor, showSubjectCards, activefunctionbutton, setActivefunctionbutton,
+    selectedright
   } = useContext(LayoutContext)
-  console.log('activefunctionbutton', activefunctionbutton);
+  // console.log('activefunctionbutton', activefunctionbutton);
   return (
-    <div className='container-screen'>
+    <div className={`container-screen ${selectedright ? 'with-right-panel' : ''}`}>
       <Splitter>  
         {showNote ? (
           <Splitter.Panel min={200} collapsible="start">
