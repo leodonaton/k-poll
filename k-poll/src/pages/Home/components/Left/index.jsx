@@ -2,7 +2,8 @@ import React, { useContext, useState, useRef, useEffect } from 'react'
 import './index.css'
 import { LayoutContext } from '../../LayoutContext'
 import { Tooltip } from 'antd'
-import { BranchesOutlined, HolderOutlined, StarOutlined, DatabaseOutlined, RightOutlined, LeftOutlined, FormatPainterOutlined, HighlightOutlined, InsertRowLeftOutlined } from '@ant-design/icons'
+import Theme from '../../../../assets/theme.png'
+import { FastForwardOutlined, BranchesOutlined, HolderOutlined, StarOutlined, DatabaseOutlined, RightOutlined, LeftOutlined, FormatPainterOutlined, HighlightOutlined, InsertRowLeftOutlined } from '@ant-design/icons'
 
 const menuData_of_note = [
   {
@@ -31,11 +32,10 @@ const menuData_of_note = [
     title: '思维导图',
     label: <BranchesOutlined />,
     menu: [
-      { title: '思维导图', label: <BranchesOutlined /> },
-      { title: '功能2', label: <BranchesOutlined /> },
-      { title: '功能3', label: <BranchesOutlined /> },
-      { title: '功能4', label: <BranchesOutlined /> },
-      { title: '功能5', label: <BranchesOutlined /> }
+      { title: '主题', label: <img src={Theme} style={{ width: 20, height: 20 }} alt="主题" /> },
+      { title: '子主题', label: <BranchesOutlined /> },
+      { title: '关联', label: <BranchesOutlined /> },
+      { title: '概要', label: <BranchesOutlined /> },
     ]
   },
   {
@@ -173,7 +173,7 @@ function FloatingSubscribeBar({ subscribeList, setSubscribeList, handleMenuBtnCl
               <button
                 className={`subscribe-btn${isActive ? ' active-menu-item' : ''}`}
                 style={{ fontSize: 18 }}
-                onClick={() => handleMenuBtnClick(item.parentIdx, item.menuIdx, true)}
+                onClick={() => handleMenuBtnClick(item.parentIdx, item.menuIdx)}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {item.m.label}
@@ -197,11 +197,15 @@ export default function Left() {
     showSubjectCards, setShowSubjectCards,
     subscribe, setSubscribe,
     subscribeList, setSubscribeList,
-    activefunctionbutton, setActivefunctionbutton
+    activefunctionbutton, setActivefunctionbutton,
+    continueactive, setContinueactive
   } = useContext(LayoutContext)
 
   const handlesubscribe = () => {
     setSubscribe(!subscribe)
+  }
+  const handleContinue = () => {
+    setContinueactive(!continueactive)
   }
   const handleAddSubscribe = (m, menuIdx, parentIdx) => () => {
     const key = `${parentIdx}-${menuIdx}`
@@ -239,7 +243,7 @@ export default function Left() {
     return () => document.removeEventListener('contextmenu', handleRightClick)
   }, [activefunctionbutton])
 
-  const handleMenuBtnClick = (parentIdx, menuIdx, isSubscribed) => {
+  const handleMenuBtnClick = (parentIdx, menuIdx) => {
     setSelectedMenuList(prev =>
       prev.map(item =>
         item.idx === parentIdx ? { ...item, menuIdx } : item
@@ -266,9 +270,13 @@ export default function Left() {
           />
           {menuData_of_note.map((item, idx) => {
             const selected_notemenu = selectedMenuList.find(v => v.idx === idx)
+            const isActive = activefunctionbutton === item.menu[selected_notemenu?.menuIdx]?.title
             return (
               <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-                <button className='left-btn'> 
+                <button
+                  className={`left-btn${isActive ? ' active-menu-item' : ''}`}
+                  onClick={() => handleMenuBtnClick(idx, selected_notemenu ? selected_notemenu.menuIdx : 0)}
+                >
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {selected_notemenu ? selected_notemenu.m = item.menu[selected_notemenu.menuIdx].label : item.label}
                   </span>
@@ -293,13 +301,14 @@ export default function Left() {
                         >
                           <button
                             className='left-menu-btn'
-                            onClick={() => handleMenuBtnClick(idx, i, isSubscribed)}
+                            onClick={() => handleMenuBtnClick(idx, i)}
                           >
                             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                               {m.label}
                               <span>{m.title}</span>
                             </span>
                           </button>
+
                           <button
                             className={`left-menu-btn star-btn${isSubscribed ? ' subscribed' : ''}`}
                             style={{
@@ -313,6 +322,7 @@ export default function Left() {
                           >
                             <StarOutlined />
                           </button>
+
                         </div>
                       )
                     })}
@@ -322,11 +332,12 @@ export default function Left() {
             )
           })}
         </div>
-
         <div className='bottom-button-container'>
+          <button className={continueactive ? 'left-btn-bottom-active' : 'left-btn'} onClick={handleContinue}><FastForwardOutlined /></button>
           <button className={subscribe ? 'left-btn-bottom-active' : 'left-btn'} onClick={handlesubscribe}><StarOutlined /></button>
         </div>
       </div>
+
 
       {(subscribe && subscribeList.length > 0) && (
         <FloatingSubscribeBar

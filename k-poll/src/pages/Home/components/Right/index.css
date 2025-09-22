@@ -19,7 +19,7 @@
     height: 90%; 
     background: #e9d8b4;
     display: flex;
-    flex-direction: row;
+    flex-direction: row;/*横向布局*/
     align-items: stretch;
     box-shadow: 0 2px 8px #dfa319; 
 }

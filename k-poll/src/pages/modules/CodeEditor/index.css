@@ -3,3 +3,18 @@
     height: 100%; /* 让内容高度随父容器变化 */
     box-sizing: border-box; /* 保证border不会溢出 */
 }
+.close-btn{
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    z-index: 10;
+    background: #fff;
+    border: 1px solid #dcb251;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}

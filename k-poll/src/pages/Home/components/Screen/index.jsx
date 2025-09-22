@@ -20,12 +20,12 @@ export default function Screen() {
             <Note />
           </Splitter.Panel>
         ) : null}
-        {showCodeEditor ? (
+        {showCodeEditor === 'codeEditor' ? (
           <Splitter.Panel min={200} collapsible="start">
             <CodeEditor />
           </Splitter.Panel>
         ) : null}
-        {showSubjectCards ? ( 
+        {showSubjectCards === 'subjectCards' ? (
           <Splitter.Panel min={200} collapsible="start">
             <SubjectCards />
           </Splitter.Panel>

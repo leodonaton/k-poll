@@ -10,7 +10,7 @@ export default function Footer() {
   const {
     showNote, showCodeEditor, showSubjectCards,
     setShowNote, setShowCodeEditor, setShowSubjectCards,
-    activefunctionbutton
+    activefunctionbutton,notedragging
   } = useContext(LayoutContext)
   return (
     <div className='container-footer'>
@@ -31,11 +31,8 @@ export default function Footer() {
       </button>
 
       <div className="dynamic-island">
-        {activefunctionbutton && (
-          <span className="island-text">
-            {activefunctionbutton}
-          </span>
-        )}
+        {activefunctionbutton && (<span className="island-text">{activefunctionbutton}</span>)}
+        {notedragging && (<span className="island-text">拖拽中</span>)}
       </div>
 
       <button className='footer-right-btn'>5</button>
@@ -43,22 +40,22 @@ export default function Footer() {
 
       {showMenu === 'note' && (
         <div className='footer-menu-popup' style={{ left: 0 }} onMouseLeave={() => setShowMenu(null)}>
-          <button className='footer-menu-btn' onClick={() => setShowNote(!showNote)}>摘录式笔记</button>
-          <button className='footer-menu-btn'>思维导图</button>
-          <button className='footer-menu-btn'>大纲笔记</button>
+          <button className='footer-menu-btn' onClick={() => setShowNote('excerpt')}>摘录式笔记</button>
+          <button className='footer-menu-btn' onClick={() => setShowNote('mindMap')}>思维导图</button>
+          <button className='footer-menu-btn' onClick={() => setShowNote('outline')}>大纲笔记</button>
         </div>
       )}
 
 
       {showMenu === 'codeEditor' && (
         <div className='footer-menu-popup' style={{ left: '100px' }} onMouseLeave={() => setShowMenu(null)}>
-          <button className='footer-menu-btn' onClick={() => setShowCodeEditor(!showCodeEditor)}>代码编辑器</button>
+          <button className='footer-menu-btn' onClick={() => setShowCodeEditor('codeEditor')}>代码编辑器</button>
         </div>
       )}
 
       {showMenu === 'subjectCards' && (
         <div className='footer-menu-popup' style={{ left: '210px' }} onMouseLeave={() => setShowMenu(null)}>
-          <button className='footer-menu-btn' onClick={() => setShowSubjectCards(!showSubjectCards)}>知识卡片</button>
+          <button className='footer-menu-btn' onClick={() => setShowSubjectCards('subjectCards')}>知识卡片</button>
         </div>
       )}
     </div>

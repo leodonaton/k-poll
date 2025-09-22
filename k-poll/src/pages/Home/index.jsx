@@ -7,13 +7,15 @@ import Footer from "./components/Footer";
 import "./index.css";
 import { LayoutContext } from "./LayoutContext";
 const Home = () => {
-  const [showNote, setShowNote] = useState(false);
-  const [showCodeEditor, setShowCodeEditor] = useState(false);
-  const [showSubjectCards, setShowSubjectCards] = useState(false);
+  const [showNote, setShowNote] = useState(null);
+  const [showCodeEditor, setShowCodeEditor] = useState(null);
+  const [showSubjectCards, setShowSubjectCards] = useState(null);
   const [subscribe, setSubscribe] = useState(false);
   const [subscribeList, setSubscribeList] = useState([]);
   const [activefunctionbutton, setActivefunctionbutton] = useState(null);
   const [selectedright, setSelectedright] = useState(null);
+  const [notedragging, setNotedragging] = useState(false);
+  const [continueactive, setContinueactive] = useState(false);
   return (
     <div className="home">
       <LayoutContext.Provider value={{
@@ -23,7 +25,9 @@ const Home = () => {
         showNote, setShowNote,
         showCodeEditor,setShowCodeEditor,
         showSubjectCards,setShowSubjectCards,
-        selectedright, setSelectedright
+        selectedright, setSelectedright,
+        notedragging, setNotedragging,
+        continueactive, setContinueactive
       }}>
 
         
