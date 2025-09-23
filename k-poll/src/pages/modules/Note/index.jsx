@@ -6,7 +6,7 @@ import Theme from './mindmapelements/Theme'
 import Subtheme from './mindmapelements/Subtheme'
 import Conection from './mindmapelements/Conection'
 import Summary from './mindmapelements/Summary'
-
+import { NoteContext } from './NoteContext'
 export default function Note() {
   const { showNote, setShowNote,
     activefunctionbutton, setActivefunctionbutton,
@@ -21,6 +21,7 @@ export default function Note() {
   }, [offset])
   const [mindmapelements, setMindmapelements] = useState([])
   //格式: [{id:'',label:'',x:0,y:0,text:'',connections:[id,id]}]
+  const [selectedIds, setSelectedIds] = useState([])
   const [scale, setScale] = useState(1)
   const dragStart = useRef({ x: 0, y: 0 })
   const offsetStart = useRef({ x: 0, y: 0 })
@@ -33,6 +34,9 @@ export default function Note() {
   // 鼠标按下左键进入拖拽
   const handleMouseDown = e => {
     if (e.button !== 0) return
+    const isSvg = e.target.tagName === 'svg'
+    if (!isSvg) return
+    
     setNotedragging(true)
     notifyDragStatus(true)
     dragStart.current = { x: e.clientX, y: e.clientY }
@@ -142,19 +146,19 @@ export default function Note() {
     switch (item.label) {
       case '主题':
         return (
-          <Theme scale={scale} offset={offset} />
+          <Theme item={item} scale={scale} offset={offset} key={item.id} />
         )
       case '子主题':
         return (
-          <Subtheme scale={scale} offset={offset} />
+          <Subtheme item={item} scale={scale} offset={offset} key={item.id} />
         )
       case '关联':
         return (
-          <Connection scale={scale} offset={offset} />
+          <Conection item={item} scale={scale} offset={offset} key={item.id} />
         )
       case '概要':
         return (
-          <Summary scale={scale} offset={offset} />
+          <Summary item={item} scale={scale} offset={offset} key={item.id} />
         )
       default:
         return null
@@ -163,7 +167,7 @@ export default function Note() {
 
   return (
     <div
-      className='container-calculator'
+      className='container-note'
       style={{
         minHeight: 300,
         width: '100%',
@@ -173,81 +177,83 @@ export default function Note() {
       }}
       onMouseDown={handleMouseDown}
     >
-      <button
-        className='close-button'
-        onClick={() => setShowNote(null)}
-      >
-        <CloseOutlined style={{ color: '#dcb251', fontSize: 10 }} />
-      </button>
+      <NoteContext.Provider value={{ 
+        mindmapelements, setMindmapelements
+      }}>
+        <button
+          className='close-button'
+          onClick={() => setShowNote(null)}
+        >
+          <CloseOutlined style={{ color: '#dcb251', fontSize: 10 }} />
+        </button>
 
-      {showNote === 'excerpt' &&
-        <svg
-          id="excerpt-svg"
-          width="100%" height="100%" style={{ display: 'block', width: '100%', height: '100%' }}>
-          <defs>
-            <pattern
-              id="grid"
-              width="20"
-              height="20"
-              patternUnits="userSpaceOnUse"
-              patternTransform={`translate(${offset.x},${offset.y}) scale(${scale})`}
-            >
-              <rect x="0" y="0" width="20" height="20" fill="none" />
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#fff" strokeWidth="1" opacity="0.7" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-          {/* <rect
+        {showNote === 'excerpt' &&
+          <svg
+            id="excerpt-svg"
+            width="100%" height="100%" style={{ display: 'block', width: '100%', height: '100%' }}>
+            <defs>
+              <pattern
+                id="grid"
+                width="20"
+                height="20"
+                patternUnits="userSpaceOnUse"
+                patternTransform={`translate(${offset.x},${offset.y}) scale(${scale})`}
+              >
+                <rect x="0" y="0" width="20" height="20" fill="none" />
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#fff" strokeWidth="1" opacity="0.7" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+            {/* <rect
           x={100 * scale + offset.x}
           y={100 * scale + offset.y}
           width={50 * scale}
           height={50 * scale}
           fill="red"
         /> */}
-        </svg>
-      }
-      {showNote === 'mindMap' &&
-        <svg
-          id="mindmap-svg"
-          width="100%"
-          height="100%"
-          style={{ display: 'block', width: '100%', height: '100%' }}
-          onClick={e => handleAddNode(e, activefunctionbutton)}
-        >
-          {mindmapelements.map((item, index) => (
-            <React.Fragment key={index}>
-              {renderNodeByLabel(item, scale, offset)}
-            </React.Fragment>
-          ))}
-        </svg>
-      }
-      {showNote === 'outline' &&
-        <svg
-          width="100%"
-          height="100%"
-          style={{ display: 'block', width: '100%', height: '100%' }}
-        >
-          <defs>
-            <pattern
-              id="notebook-lines"
-              width="100"
-              height="30"
-              patternUnits="userSpaceOnUse"
-              patternTransform={`translate(${offset.x},${offset.y}) scale(${scale})`}
-            >
-              <line x1="0" y1="29" x2="100" y2="29" stroke="#fff" strokeWidth="2" opacity="0.8" />
-            </pattern>
-          </defs>
-          <rect
-            x="20%"
-            width="60%"
+          </svg>
+        }
+        {showNote === 'mindMap' &&
+          <svg
+            id="mindmap-svg"
+            width="100%"
             height="100%"
-            fill="url(#notebook-lines)"
-            stroke="#dcb251"
-            strokeWidth="1"
-          />
-        </svg>
-      }
+            style={{ display: 'block', width: '100%', height: '100%' }}
+            onClick={e => handleAddNode(e, activefunctionbutton)}
+          >
+            {mindmapelements.map((item, _) => (
+              renderNodeByLabel(item, scale, offset)
+            ))}
+          </svg>
+        }
+        {showNote === 'outline' &&
+          <svg
+            width="100%"
+            height="100%"
+            style={{ display: 'block', width: '100%', height: '100%' }}
+          >
+            <defs>
+              <pattern
+                id="notebook-lines"
+                width="100"
+                height="30"
+                patternUnits="userSpaceOnUse"
+                patternTransform={`translate(${offset.x},${offset.y}) scale(${scale})`}
+              >
+                <line x1="0" y1="29" x2="100" y2="29" stroke="#fff" strokeWidth="2" opacity="0.8" />
+              </pattern>
+            </defs>
+            <rect
+              x="20%"
+              width="60%"
+              height="100%"
+              fill="url(#notebook-lines)"
+              stroke="#dcb251"
+              strokeWidth="1"
+            />
+          </svg>
+        }
+      </NoteContext.Provider>
     </div>
   )
 }
