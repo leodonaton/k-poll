@@ -14,7 +14,6 @@
 }
 .node-group{
     fill: maroon;
-    
     opacity: 0.5;
     transition: all 0.2s;
     cursor: pointer;
@@ -26,4 +25,18 @@
 .node-group:hover .node-border {
     opacity: 0.5;
     pointer-events: auto; 
+}
+.node-input,
+.node-group span,
+.node-group input,
+.node-group div,
+.node-group img,
+.node-plus-group div,
+.node-plus-group img {
+  user-select: none;
+}
+
+/* 也可以全局覆盖 */
+span, input, div, img {
+  user-select: none;
 }

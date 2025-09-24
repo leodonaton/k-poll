@@ -14,7 +14,24 @@ export default function Screen() {
   // console.log('activefunctionbutton', activefunctionbutton);
   return (
     <div className={`container-screen ${selectedright ? 'with-right-panel' : ''}`}>
-      <Splitter>  
+      {
+        !showNote && !showCodeEditor && !showSubjectCards ? (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 20,
+              color: '#888',
+              userSelect: 'none'
+            }}
+          >
+            从下面选一个板块开始创作吧！
+          </div>
+        ):(
+          <Splitter>  
         {showNote ? (
           <Splitter.Panel min={200} collapsible="start">
             <Note />
@@ -31,6 +48,8 @@ export default function Screen() {
           </Splitter.Panel>
         ) : null}
       </Splitter>
+        )
+      }
     </div>
   )
 }

@@ -80,3 +80,13 @@
 .ant-splitter-bar-collapse-bar .ant-splitter-bar-collapse-bar-end::after {
 	background: #dfa522 !important;
 }
+.placeholder {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #888;
+	font-size: 18px;
+	text-align: center;
+	user-select: none;
+}

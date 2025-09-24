@@ -1,0 +1,42 @@
+.node-input{
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    color: white;
+    border: none;
+    outline: none;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: inherit;
+    line-height: inherit;
+    vertical-align: middle;
+}
+.node-group{
+    fill: maroon;
+    opacity: 0.5;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.node-border{
+   opacity: 0;
+    pointer-events: none;
+}
+.node-group:hover .node-border {
+    opacity: 0.5;
+    pointer-events: auto; 
+}
+.node-input,
+.node-group span,
+.node-group input,
+.node-group div,
+.node-group img,
+.node-plus-group div,
+.node-plus-group img {
+  user-select: none;
+}
+
+/* 也可以全局覆盖 */
+span, input, div, img {
+  user-select: none;
+}

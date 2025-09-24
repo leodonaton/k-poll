@@ -14,7 +14,6 @@ export default function Note() {
     continueactive
   } = useContext(LayoutContext)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
-  // 新增：用于始终获取最新 offset
   const offsetRef = useRef(offset)
   useEffect(() => {
     offsetRef.current = offset
@@ -25,6 +24,7 @@ export default function Note() {
   const [scale, setScale] = useState(1)
   const dragStart = useRef({ x: 0, y: 0 })
   const offsetStart = useRef({ x: 0, y: 0 })
+  const [hoverAnchorId, setHoverAnchorId] = useState(null);
 
   // 通知拖拽状态
   const notifyDragStatus = (status) => {
@@ -96,8 +96,8 @@ export default function Note() {
   const handleAddNode = (e, type = activefunctionbutton) => {
     if (e.target.tagName !== 'svg') return;
     const typeConfig = {
-      '主题': { label: '主题', text: '主题', connections: [] },
-      '子主题': { label: '子主题', text: '子主题', connections: [] },
+      '主题': { label: '主题', text: '主题', connections: [], childIds: [] },
+      '子主题': { label: '子主题', text: '子主题', connections: [], fatherId: null, childIds: [] },
       '关联': { label: '关联', text: '关联', connections: [] },
       '概要': { label: '概要', text: '概要', connections: [] }
     };
@@ -142,11 +142,44 @@ export default function Note() {
     }
   }, [showNote, scale])
 
+  useEffect(() => {
+    function handleNodeDrag(e) {
+      const { nodeId, x, y } = e.detail || {};
+      const draggingNode = mindmapelements.find(n => n.id === nodeId);
+      if (!draggingNode || draggingNode.label !== '子主题') {
+        setHoverAnchorId(null);
+        return;
+      }
+      let found = null;
+      mindmapelements.forEach(theme => {
+        if (theme.label === '主题') {
+          const tx = theme.x * scale + offset.x;
+          const ty = theme.y * scale + offset.y;
+          const dx = (x * scale + offset.x) - tx;
+          const dy = (y * scale + offset.y) - ty;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 80 * scale) { 
+            found = theme.id;
+          }
+        }
+      });
+      setHoverAnchorId(found);
+    }
+    window.addEventListener('node-dragging', handleNodeDrag);
+    return () => window.removeEventListener('node-dragging', handleNodeDrag);
+  }, [mindmapelements, scale, offset]);
+
   function renderNodeByLabel(item, scale, offset) {
     switch (item.label) {
       case '主题':
         return (
-          <Theme item={item} scale={scale} offset={offset} key={item.id} />
+          <Theme
+            item={item}
+            scale={scale}
+            offset={offset}
+            key={item.id}
+            highlight={hoverAnchorId === item.id}
+          />
         )
       case '子主题':
         return (

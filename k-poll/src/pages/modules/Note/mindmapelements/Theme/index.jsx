@@ -3,7 +3,7 @@ import { NoteContext } from '../../NoteContext'
 import './index.css'
 import { PlusOutlined } from '@ant-design/icons'
 
-export default function Theme({ item, scale, offset, id }) {
+export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
   const { mindmapelements, setMindmapelements } = useContext(NoteContext)
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(item.text)
@@ -16,33 +16,57 @@ export default function Theme({ item, scale, offset, id }) {
   const x = item.x * scale + offset.x
   const y = item.y * scale + offset.y
   // 节点宽高
-  const w = 100 * scale
-  const h = 50 * scale
   const rx = 15 * scale
   const ry = 15 * scale
   // 新增：外扩边框参数（调小）
   const borderPad = 3 * scale
   const borderRx = rx + 1.5 * scale
   const borderRy = ry + 1.5 * scale
+  // 最小宽度
+  const minWidth = 100 * scale;
+  const textMeasureRef = useRef(null);
+  const [dynamicWidth, setDynamicWidth] = useState(minWidth);
+
+  useEffect(() => {
+    if (textMeasureRef.current) {
+      const measured = textMeasureRef.current.offsetWidth + 20 * scale; // 额外加一些内边距
+      setDynamicWidth(Math.max(minWidth, measured));
+    }
+  }, [text, scale]);
+
+  const w = dynamicWidth;
+  const h = 50 * scale;
   // 处理节点拖拽
   const handleOnNodeMouseDown = (e) => {
-    e.stopPropagation()
-    if (e.button !== 0) return
-    console.log('鼠标位置', e.clientX, e.clientY)
-    const rect = nodeRef.current.getBoundingClientRect()
-    console.log('节点位置', rect.left, rect.top)
-    console.log('偏移', e.clientX - rect.left, e.clientY - rect.top)
+    e.stopPropagation();
+    if (e.button !== 0) return;
+    // 获取 SVG 坐标
+    let svg = svgRef?.current || nodeRef.current?.ownerSVGElement;
+    if (!svg) return;
+    let pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    let svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+    // 计算节点中心坐标
+    const nodeX = item.x * scale + offset.x;
+    const nodeY = item.y * scale + offset.y;
     setNodeoffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    })
-    setIsNodeDragging(true)
-  }
-  useEffect(()=>{
-    function handleMouseMove(e){
-      if(!isNodeDragging) return;
-      let newX = (e.clientX - nodeoffset.x - offset.x) / scale;
-      let newY = (e.clientY - nodeoffset.y - offset.y) / scale;
+      x: svgP.x - nodeX,
+      y: svgP.y - nodeY
+    });
+    setIsNodeDragging(true);
+  };
+  useEffect(() => {
+    function handleMouseMove(e) {
+      if (!isNodeDragging) return;
+      let svg = svgRef?.current || nodeRef.current?.ownerSVGElement;
+      if (!svg) return;
+      let pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      let svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+      let newX = (svgP.x - nodeoffset.x - offset.x) / scale;
+      let newY = (svgP.y - nodeoffset.y - offset.y) / scale;
       setMindmapelements(
         mindmapelements.map(el =>
           el.id === item.id ? { ...el, x: newX, y: newY } : el
@@ -60,7 +84,7 @@ export default function Theme({ item, scale, offset, id }) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     }
-  },[isNodeDragging,nodeoffset])
+  }, [isNodeDragging, nodeoffset, scale, offset, mindmapelements, setMindmapelements, item.id, svgRef])
 
 
   const handleDoubleClick = () => setEditing(true)
@@ -106,7 +130,6 @@ export default function Theme({ item, scale, offset, id }) {
         rx={rx}
         ry={ry}
       />
-      {/* 外扩一点的 path 边框 */}
       <path
         d={`
           M ${x - w / 2 - borderPad + borderRx} ${y - h / 2 - borderPad}
@@ -127,10 +150,29 @@ export default function Theme({ item, scale, offset, id }) {
         style={showAddNode?{opacity:1}:{}}
       />
       <foreignObject
-        height={h / 2}
-        width={w * 0.8}
-        x={x - (w * 0.8) / 2}
-        y={y - (h / 4)}
+        style={{ position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }}
+        width={9999}
+        height={40}
+        x={0}
+        y={0}
+      >
+        <span
+          ref={textMeasureRef}
+          style={{
+            fontSize: 20 * scale,
+            fontFamily: 'inherit',
+            whiteSpace: 'pre',
+            userSelect: 'none'
+          }}
+        >
+          {text}
+        </span>
+      </foreignObject>
+      <foreignObject
+        height={h}
+        width={w}
+        x={x - w / 2}
+        y={y - h / 2}
       >
         <div
           xmlns="http://www.w3.org/1999/xhtml"
@@ -141,7 +183,11 @@ export default function Theme({ item, scale, offset, id }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            height: '100%'
+            height: '100%',
+            width: '100%',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            textAlign: 'center'
           }}
           onDoubleClick={handleDoubleClick}
         >
@@ -153,9 +199,10 @@ export default function Theme({ item, scale, offset, id }) {
               onBlur={handleBlur}
               onKeyDown={e => { if (e.key === 'Enter') handleBlur() }}
               className='node-input'
+              style={{ width: '100%' }}
             />
           ) : (
-            <span>{item.text}</span>
+            <span style={{ userSelect: 'none', width: '100%' }}>{item.text}</span>
           )}
         </div>
       </foreignObject>

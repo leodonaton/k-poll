@@ -1,2 +1,2 @@
-# k-poll
-knowledge poll for me
+# k-pool
+knowledge pool for me
