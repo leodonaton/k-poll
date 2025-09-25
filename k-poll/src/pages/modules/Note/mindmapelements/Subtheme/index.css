@@ -1,4 +1,4 @@
-.node-input{
+.sub-node-input{
     width: 100%;
     height: 100%;
     background: transparent;
@@ -12,27 +12,27 @@
     line-height: inherit;
     vertical-align: middle;
 }
-.node-group{
-    fill: maroon;
+.sub-node-group{
+    fill: pink;
     opacity: 0.5;
     transition: all 0.2s;
     cursor: pointer;
 }
-.node-border{
+.sub-node-border{
    opacity: 0;
     pointer-events: none;
 }
-.node-group:hover .node-border {
+.sub-node-group:hover .sub-node-border {
     opacity: 0.5;
     pointer-events: auto; 
 }
-.node-input,
-.node-group span,
-.node-group input,
-.node-group div,
-.node-group img,
-.node-plus-group div,
-.node-plus-group img {
+.sub-node-input,
+.sub-node-group span,
+.sub-node-group input,
+.sub-node-group div,
+.sub-node-group img,
+.sub-node-plus-group div,
+.sub-node-plus-group img {
   user-select: none;
 }
 
