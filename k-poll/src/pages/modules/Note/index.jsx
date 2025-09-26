@@ -19,13 +19,13 @@ export default function Note() {
     offsetRef.current = offset
   }, [offset])
   const [mindmapelements, setMindmapelements] = useState([])
-  //格式: [{id:'',label:'',x:0,y:0,w:0,h:0,text:'',connections:[id,id]}]
+  //格式: [{id:'',label:'',x:0,y:0,text:'',connections:[id,id]}]
   const [selectedIds, setSelectedIds] = useState([])
   const [scale, setScale] = useState(1)
   const dragStart = useRef({ x: 0, y: 0 })
   const offsetStart = useRef({ x: 0, y: 0 })
   const [hoverAnchorId, setHoverAnchorId] = useState(null);
-  const [highlightId, setHighlightId] = useState(null);
+
   // 通知拖拽状态
   const notifyDragStatus = (status) => {
     window.dispatchEvent(new CustomEvent('note-drag-status', { detail: { notedragging: status } }))
@@ -34,9 +34,9 @@ export default function Note() {
   // 鼠标按下左键进入拖拽
   const handleMouseDown = e => {
     if (e.button !== 0) return
-    // const isSvg = e.target.tagName === 'svg'
-    // if (!isSvg) return
-    // console.log(e.target.tagName)
+    const isSvg = e.target.tagName === 'svg'
+    if (!isSvg) return
+    
     setNotedragging(true)
     notifyDragStatus(true)
     dragStart.current = { x: e.clientX, y: e.clientY }
@@ -96,8 +96,8 @@ export default function Note() {
   const handleAddNode = (e, type = activefunctionbutton) => {
     if (e.target.tagName !== 'svg') return;
     const typeConfig = {
-      '主题': { label: '主题', text: '主题', childIds: [] },
-      '子主题': { label: '子主题', text: '子主题',  fatherId: null, childIds: [] },
+      '主题': { label: '主题', text: '主题', connections: [], childIds: [] },
+      '子主题': { label: '子主题', text: '子主题', connections: [], fatherId: null, childIds: [] },
       '关联': { label: '关联', text: '关联', connections: [] },
       '概要': { label: '概要', text: '概要', connections: [] }
     };
@@ -106,15 +106,11 @@ export default function Note() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left - offset.x) / scale;
     const y = (e.clientY - rect.top - offset.y) / scale;
-    const w = 100 * scale;
-    const h = 50 * scale;
     const newNode = {
       id: Date.now().toString(),
       ...config,
       x,
-      y,
-      w,
-      h
+      y
     };
     setMindmapelements([...mindmapelements, newNode]);
     if (!continueactive) {
@@ -215,8 +211,7 @@ export default function Note() {
       onMouseDown={handleMouseDown}
     >
       <NoteContext.Provider value={{ 
-        mindmapelements, setMindmapelements,
-        highlightId, setHighlightId
+        mindmapelements, setMindmapelements
       }}>
         <button
           className='close-button'
@@ -242,6 +237,13 @@ export default function Note() {
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
+            {/* <rect
+          x={100 * scale + offset.x}
+          y={100 * scale + offset.y}
+          width={50 * scale}
+          height={50 * scale}
+          fill="red"
+        /> */}
           </svg>
         }
         {showNote === 'mindMap' &&

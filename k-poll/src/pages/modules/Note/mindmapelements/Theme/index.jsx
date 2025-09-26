@@ -1,19 +1,17 @@
-import React, { useContext, useState, useRef, useEffect, use } from 'react'
+import React, { useContext, useState,useRef,useEffect, use } from 'react'
 import { NoteContext } from '../../NoteContext'
 import './index.css'
 import { PlusOutlined } from '@ant-design/icons'
 
 export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
-  const { mindmapelements, setMindmapelements,
-    highlightId, setHighlightId,
-   } = useContext(NoteContext)
+  const { mindmapelements, setMindmapelements } = useContext(NoteContext)
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(item.text)
   const [isNodeDragging, setIsNodeDragging] = useState(false);
-  const [nodeoffset, setNodeoffset] = useState({ x: 0, y: 0 });
+  const [nodeoffset, setNodeoffset] = useState({x:0,y:0});
   const [showAddNode, setShowAddNode] = useState(false);
   const nodeRef = useRef(null);
-
+  
   // 计算缩放和偏移后的中心坐标
   const x = item.x * scale + offset.x
   const y = item.y * scale + offset.y
@@ -33,16 +31,12 @@ export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
     if (textMeasureRef.current) {
       const measured = textMeasureRef.current.offsetWidth + 20 * scale; // 额外加一些内边距
       setDynamicWidth(Math.max(minWidth, measured));
-      setMindmapelements(
-        mindmapelements.map(el =>
-          el.id === item.id ? { ...el, w: Math.max(minWidth, measured) } : el
-        )
-      );
     }
   }, [text, scale]);
 
-  const w = item.w || dynamicWidth;
-  const h = item.h || 50 * scale;
+  const w = dynamicWidth;
+  const h = 50 * scale;
+  // 处理节点拖拽
   const handleOnNodeMouseDown = (e) => {
     e.stopPropagation();
     if (e.button !== 0) return;
@@ -79,14 +73,14 @@ export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
         )
       );
     }
-    function handleMouseUp() {
+    function handleMouseUp(){
       setIsNodeDragging(false);
     }
-    if (isNodeDragging) {
+    if (isNodeDragging){
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
-    return () => {
+    return ()=>{
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     }
@@ -153,7 +147,7 @@ export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
         stroke="blue"
         strokeWidth={1.5 * scale}
         className='node-border'
-        style={showAddNode ? { opacity: 1 } : {}}
+        style={showAddNode?{opacity:1}:{}}
       />
       <foreignObject
         style={{ position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }}
@@ -213,55 +207,36 @@ export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
         </div>
       </foreignObject>
       {showAddNode &&
-        <g
-          className='node-plus-group'
-        >
-          <circle
-            cx={x + w / 2 + 15 * scale}
-            cy={y}
-            r={10 * scale}
-            fill="none"
-            stroke="white"
-            strokeWidth={1 * scale}
-            style={{ cursor: 'pointer' }}
-          />
-          <foreignObject
-            x={x + w / 2 + 5 * scale}
-            y={y - 10 * scale}
-            width={20 * scale}
-            height={20 * scale}
-          >
-            <div
-              className='node-plus'
-              onClick={() => handleAddChildNode()}>
-              <PlusOutlined  className='plus-icon' style={{ fontSize: 16 * scale }} />
-            </div>
-          </foreignObject>
-        </g>
-      }
-      {
-        highlightId === item.id &&
-        <path 
-          d={`
-            M ${x - w / 2 - borderPad + borderRx} ${y - h / 2 - borderPad}
-            H ${x + w / 2 + borderPad - borderRx}
-            A ${borderRx} ${borderRy} 0 0 1 ${x + w / 2 + borderPad} ${y - h / 2 - borderPad + borderRy}
-            V ${y + h / 2 + borderPad - borderRy}
-            A ${borderRx} ${borderRy} 0 0 1 ${x + w / 2 + borderPad - borderRx} ${y + h / 2 + borderPad}
-            H ${x - w / 2 - borderPad + borderRx}
-            A ${borderRx} ${borderRy} 0 0 1 ${x - w / 2 - borderPad} ${y + h / 2 + borderPad - borderRy}
-            V ${y - h / 2 - borderPad + borderRy}
-            A ${borderRx} ${borderRy} 0 0 1 ${x - w / 2 - borderPad + borderRx} ${y - h / 2 - borderPad}
-            Z
-          `}
-          fill="none"
-          stroke="orange"
-          strokeWidth={2 * scale}
-          className='node-highlight'
-          
-        />
-
-      }
+      <g
+      className='node-plus-group'
+      >
+      <circle 
+        cx={x + w / 2 + 15 * scale} 
+        cy={y} 
+        r={10 * scale} 
+        fill="none" 
+        stroke="white" 
+        strokeWidth={1 * scale} 
+        style={{ cursor: 'pointer' }} 
+      />
+      <foreignObject
+        x={x + w / 2 + 5 * scale}
+        y={y - 10 * scale}
+        width={20 * scale}
+        height={20 * scale}
+      >
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <PlusOutlined style={{ color: 'white', fontSize: 16 * scale }} />
+        </div>
+      </foreignObject>
+    </g>
+}
     </g>
   )
 }
