@@ -24,7 +24,6 @@ export default function Note() {
   const [scale, setScale] = useState(1)
   const dragStart = useRef({ x: 0, y: 0 })
   const offsetStart = useRef({ x: 0, y: 0 })
-  const [hoverAnchorId, setHoverAnchorId] = useState(null);
   const [highlightId, setHighlightId] = useState(null);
   // 通知拖拽状态
   const notifyDragStatus = (status) => {
@@ -146,32 +145,6 @@ export default function Note() {
     }
   }, [showNote, scale])
 
-  useEffect(() => {
-    function handleNodeDrag(e) {
-      const { nodeId, x, y } = e.detail || {};
-      const draggingNode = mindmapelements.find(n => n.id === nodeId);
-      if (!draggingNode || draggingNode.label !== '子主题') {
-        setHoverAnchorId(null);
-        return;
-      }
-      let found = null;
-      mindmapelements.forEach(theme => {
-        if (theme.label === '主题') {
-          const tx = theme.x * scale + offset.x;
-          const ty = theme.y * scale + offset.y;
-          const dx = (x * scale + offset.x) - tx;
-          const dy = (y * scale + offset.y) - ty;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 80 * scale) { 
-            found = theme.id;
-          }
-        }
-      });
-      setHoverAnchorId(found);
-    }
-    window.addEventListener('node-dragging', handleNodeDrag);
-    return () => window.removeEventListener('node-dragging', handleNodeDrag);
-  }, [mindmapelements, scale, offset]);
 
   function renderNodeByLabel(item, scale, offset) {
     switch (item.label) {
@@ -182,7 +155,6 @@ export default function Note() {
             scale={scale}
             offset={offset}
             key={item.id}
-            highlight={hoverAnchorId === item.id}
           />
         )
       case '子主题':
