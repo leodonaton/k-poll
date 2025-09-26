@@ -4,10 +4,12 @@ import { NoteContext } from '../../NoteContext'
 import './index.css'
 import { PlusOutlined } from '@ant-design/icons'
 export default function Subtheme( { item, scale, offset, id, svgRef }) {
-  const { mindmapelements, setMindmapelements } = useContext(NoteContext)
+  const { mindmapelements, setMindmapelements,
+    highlightId, setHighlightId
+   } = useContext(NoteContext)
     const [editing, setEditing] = useState(false)
     const [text, setText] = useState(item.text)
-    const [isNodeDragging, setIsNodeDragging] = useState(false);
+    const [isNodeDragging, setIsNodeDragging] = useState(false)
     const [nodeoffset, setNodeoffset] = useState({x:0,y:0});
     const [showAddNode, setShowAddNode] = useState(false);
     const nodeRef = useRef(null);
@@ -36,6 +38,13 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
   
     const w = dynamicWidth;
     const h = 50 * scale;
+    useEffect(() => {
+      setMindmapelements(
+        mindmapelements.map(el =>
+          el.id === item.id ? { ...el, w, h } : el
+        )
+      );
+    }, [w, h]);
     // 处理节点拖拽
     const handleOnNodeMouseDown = (e) => {
       e.stopPropagation();
@@ -55,6 +64,16 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
         y: svgP.y - nodeY
       });
       setIsNodeDragging(true);
+      if(item.fatherId){
+      mindmapelements.find(el => el.id === item.fatherId)
+      .childIds = mindmapelements.find(
+        el => el.id === item.fatherId
+      ).childIds.filter(cid => cid !== item.id);
+      
+      mindmapelements.find(el => el.id === item.id).fatherId = null;
+
+      setMindmapelements([...mindmapelements]);
+      }
     };
     useEffect(() => {
       function handleMouseMove(e) {
@@ -67,14 +86,59 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
         let svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
         let newX = (svgP.x - nodeoffset.x - offset.x) / scale;
         let newY = (svgP.y - nodeoffset.y - offset.y) / scale;
-        setMindmapelements(
-          mindmapelements.map(el =>
-            el.id === item.id ? { ...el, x: newX, y: newY } : el
-          )
+
+        // 递归移动子树
+        function moveSubtree(nodeId, dx, dy, elements) {
+          const node = elements.find(el => el.id === nodeId);
+          if (!node) return;
+          node.x += dx;
+          node.y += dy;
+          if (node.childIds && node.childIds.length > 0) {
+            node.childIds.forEach(cid => {
+              moveSubtree(cid, dx, dy, elements);
+            });
+          }
+        }
+
+        const dx = newX - item.x;
+        const dy = newY - item.y;
+        // 复制数组，避免直接修改原状态
+        const updatedElements = mindmapelements.map(el => ({ ...el }));
+        moveSubtree(item.id, dx, dy, updatedElements);
+
+        setMindmapelements(updatedElements);
+
+        const foundElement = mindmapelements.find(el =>(
+          el.x  < item.x && el.x + el.w > item.x &&(
+            el.y - el.h/2 < item.y - item.h/2 && el.y + el.h/2 > item.y - item.h/2 ||
+            el.y - el.h/2 < item.y + item.h/2 && el.y + el.h/2 > item.y + item.h/2 
+          ))
         );
+        // console.log('坐标', foundElement.x,foundElement.y);
+        // console.log('长宽', foundElement.w/2,foundElement.h/2);
+        // console.log('鼠标',e.clientX,e.clientY);
+        // console.log('item-pos', item.x);
+        // console.log('-------------------------------------------------------')
+        if (foundElement && foundElement.id !== item.id) {
+          setHighlightId(foundElement.id);
+        }
+        else{
+          setHighlightId(null);
+        }
+
       }
       function handleMouseUp(){
         setIsNodeDragging(false);
+        if (highlightId) {
+          const parent = mindmapelements.find(el => el.id === highlightId);
+          if (parent) {
+            parent.childIds = Array.from(new Set([...parent.childIds, item.id]));
+          }
+          mindmapelements.find(el => el.id === item.id).fatherId = highlightId;
+           mindmapelements.find(el => el.id === item.id).x +=100/scale;
+          setMindmapelements([...mindmapelements]);
+          setHighlightId(null);
+        }
       }
       if (isNodeDragging){
         document.addEventListener('mousemove', handleMouseMove);
@@ -86,7 +150,13 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
       }
     }, [isNodeDragging, nodeoffset, scale, offset, mindmapelements, setMindmapelements, item.id, svgRef])
   
-  
+    // useEffect(() => {
+    //   console.log('highlightId changed:', highlightId);
+    //   console.log('Current mindmapelements:', mindmapelements);
+    // }, [mindmapelements])
+    
+
+
     const handleDoubleClick = () => setEditing(true)
     const handleChange = e => setText(e.target.value)
     const handleBlur = () => {
@@ -118,7 +188,7 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
     <g
       id={id}
       ref={nodeRef}
-      className='node-group'
+      className='sub-node-group'
       onMouseDown={handleOnNodeMouseDown}
       onClick={handleShow}
     >
@@ -146,7 +216,7 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
         fill="none"
         stroke="blue"
         strokeWidth={1.5 * scale}
-        className='node-border'
+        className='sub-node-border'
         style={showAddNode?{opacity:1}:{}}
       />
       <foreignObject
@@ -198,7 +268,7 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
               onChange={handleChange}
               onBlur={handleBlur}
               onKeyDown={e => { if (e.key === 'Enter') handleBlur() }}
-              className='node-input'
+              className='sub-node-input'
               style={{ width: '100%' }}
             />
           ) : (
@@ -208,7 +278,7 @@ export default function Subtheme( { item, scale, offset, id, svgRef }) {
       </foreignObject>
       {showAddNode &&
       <g
-      className='node-plus-group'
+      className='sub-node-plus-group'
       >
       <circle 
         cx={x + w / 2 + 15 * scale} 

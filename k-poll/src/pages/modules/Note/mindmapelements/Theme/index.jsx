@@ -4,7 +4,7 @@ import './index.css'
 import { PlusOutlined } from '@ant-design/icons'
 
 export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
-  const { mindmapelements, setMindmapelements } = useContext(NoteContext)
+  const { mindmapelements, setMindmapelements, highlightId } = useContext(NoteContext)
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(item.text)
   const [isNodeDragging, setIsNodeDragging] = useState(false);
@@ -36,6 +36,15 @@ export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
 
   const w = dynamicWidth;
   const h = 50 * scale;
+
+  useEffect(() => {
+    setMindmapelements(
+      mindmapelements.map(el =>
+        el.id === item.id ? { ...el, w, h } : el
+      )
+    );
+  }, [w, h]);
+
   // 处理节点拖拽
   const handleOnNodeMouseDown = (e) => {
     e.stopPropagation();
@@ -67,11 +76,25 @@ export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
       let svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
       let newX = (svgP.x - nodeoffset.x - offset.x) / scale;
       let newY = (svgP.y - nodeoffset.y - offset.y) / scale;
-      setMindmapelements(
-        mindmapelements.map(el =>
-          el.id === item.id ? { ...el, x: newX, y: newY } : el
-        )
-      );
+      function moveSubtree(nodeId, dx, dy, elements) {
+          const node = elements.find(el => el.id === nodeId);
+          if (!node) return;
+          node.x += dx;
+          node.y += dy;
+          if (node.childIds && node.childIds.length > 0) {
+            node.childIds.forEach(cid => {
+              moveSubtree(cid, dx, dy, elements);
+            });
+          }
+        }
+
+        const dx = newX - item.x;
+        const dy = newY - item.y;
+        // 复制数组，避免直接修改原状态
+        const updatedElements = mindmapelements.map(el => ({ ...el }));
+        moveSubtree(item.id, dx, dy, updatedElements);
+
+        setMindmapelements(updatedElements);
     }
     function handleMouseUp(){
       setIsNodeDragging(false);
