@@ -5,7 +5,8 @@ import './index.css'
 import { PlusOutlined } from '@ant-design/icons'
 export default function Subtheme({ item, scale, offset, id, svgRef }) {
   const { mindmapelements, setMindmapelements,
-    highlightId, setHighlightId
+    highlightId, setHighlightId,
+    lines, setLines
   } = useContext(NoteContext)
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(item.text)
@@ -13,7 +14,6 @@ export default function Subtheme({ item, scale, offset, id, svgRef }) {
   const [nodeoffset, setNodeoffset] = useState({ x: 0, y: 0 });
   const [showAddNode, setShowAddNode] = useState(false);
   const nodeRef = useRef(null);
-
   // 计算缩放和偏移后的中心坐标
   const x = item.x * scale + offset.x
   const y = item.y * scale + offset.y
@@ -110,7 +110,7 @@ export default function Subtheme({ item, scale, offset, id, svgRef }) {
         setMindmapelements(
           mindmapelements.map(el =>
             el.id === item.id
-              ? { ...el, fatherId: highlightId }
+              ? { ...el, fatherId: highlightId,x : mindmapelements.find(n => n.id === highlightId).x + 150/scale }
               : el.id === highlightId
                 ? { ...el, childIds: [...new Set([...(el.childIds || []), item.id])] }
                 : el
@@ -132,11 +132,33 @@ export default function Subtheme({ item, scale, offset, id, svgRef }) {
 
 
   useEffect(() => {
-    console.log('最新mindmapelements:', mindmapelements);
-  }, [mindmapelements])
+    console.log(highlightId);
+  }, [highlightId])
 
+  useEffect(() => {
+    const newLines = [];
+    mindmapelements.forEach(item => {
+      if (item.childIds) {
+        item.childIds.forEach(childId => {
+          const node = mindmapelements.find(el => el.id === childId);
+          newLines.push({
+            fromId: item.id,
+            fromX: item.x,
+            fromY: item.y,
+            toId: childId,
+            toX: item.x + 100 * scale,
+            toY: node.y
+          });
+        });
+      }
+    });
+    setLines(newLines);
+  }, [mindmapelements]);
 
-
+  
+  useEffect(() => {
+    console.log('最新的 lines:', lines);
+  }, [lines]);
 
   const handleDoubleClick = () => setEditing(true)
   const handleChange = e => setText(e.target.value)

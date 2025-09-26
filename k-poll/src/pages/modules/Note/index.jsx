@@ -7,6 +7,7 @@ import Subtheme from './mindmapelements/Subtheme'
 import Conection from './mindmapelements/Conection'
 import Summary from './mindmapelements/Summary'
 import { NoteContext } from './NoteContext'
+import Line from './mindmapelements/line'
 export default function Note() {
   const { showNote, setShowNote,
     activefunctionbutton, setActivefunctionbutton,
@@ -26,6 +27,7 @@ export default function Note() {
   const offsetStart = useRef({ x: 0, y: 0 })
   const [hoverAnchorId, setHoverAnchorId] = useState(null);
   const [highlightId, setHighlightId] = useState(null);
+  const [lines, setLines] = useState([]);
   // 通知拖拽状态
   const notifyDragStatus = (status) => {
     window.dispatchEvent(new CustomEvent('note-drag-status', { detail: { notedragging: status } }))
@@ -216,7 +218,8 @@ export default function Note() {
     >
       <NoteContext.Provider value={{ 
         mindmapelements, setMindmapelements,
-        highlightId, setHighlightId
+        highlightId, setHighlightId,
+        lines, setLines,
       }}>
         <button
           className='close-button'
@@ -252,6 +255,7 @@ export default function Note() {
             style={{ display: 'block', width: '100%', height: '100%' }}
             onClick={e => handleAddNode(e, activefunctionbutton)}
           >
+            <Line />
             {mindmapelements.map((item, _) => (
               renderNodeByLabel(item, scale, offset)
             ))}
