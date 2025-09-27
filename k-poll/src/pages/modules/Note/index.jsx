@@ -37,7 +37,7 @@ export default function Note() {
     if (e.button !== 0) return
     const isSvg = e.target.tagName === 'svg'
     if (!isSvg) return
-    
+
     setNotedragging(true)
     notifyDragStatus(true)
     dragStart.current = { x: e.clientX, y: e.clientY }
@@ -93,7 +93,17 @@ export default function Note() {
       y: my - mouseY * next
     }
   }
-
+  function getRandomHexChar() {
+    const hexChars = '0123456789abcdef';
+    return hexChars[Math.floor(Math.random() * hexChars.length)];
+  }
+  function generatecolor() {
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += getRandomHexChar();
+    }
+    return color;
+  }
   const handleAddNode = (e, type = activefunctionbutton) => {
     if (e.target.tagName !== 'svg') return;
     const typeConfig = {
@@ -107,8 +117,9 @@ export default function Note() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left - offset.x) / scale;
     const y = (e.clientY - rect.top - offset.y) / scale;
-    const w = 100 * scale;
-    const h = 50 * scale;
+    const w = null;
+    const h = null;
+    const color = generatecolor();
     // 处理新节点与现有节点的连接关系
     const newNode = {
       // id: mindmapelements.length + 1,
@@ -116,6 +127,9 @@ export default function Note() {
       ...config,
       x,
       y,
+      w,
+      h,
+      color
     };
     setMindmapelements([...mindmapelements, newNode]);
     if (!continueactive) {
@@ -187,7 +201,7 @@ export default function Note() {
       }}
       onMouseDown={handleMouseDown}
     >
-      <NoteContext.Provider value={{ 
+      <NoteContext.Provider value={{
         mindmapelements, setMindmapelements,
         highlightId, setHighlightId
       }}>

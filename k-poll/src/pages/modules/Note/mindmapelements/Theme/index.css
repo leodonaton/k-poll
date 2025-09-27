@@ -13,7 +13,6 @@
     vertical-align: middle;
 }
 .node-group{
-    fill: maroon;
     opacity: 0.5;
     transition: all 0.2s;
     cursor: pointer;

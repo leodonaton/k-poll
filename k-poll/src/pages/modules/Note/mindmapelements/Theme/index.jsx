@@ -3,7 +3,7 @@ import { NoteContext } from '../../NoteContext'
 import './index.css'
 import { PlusOutlined } from '@ant-design/icons'
 
-export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
+export default function Theme({ item, scale, offset, svgRef }) {
   const { mindmapelements, setMindmapelements, highlightId } = useContext(NoteContext)
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(item.text)
@@ -139,9 +139,10 @@ export default function Theme({ item, scale, offset, id, svgRef, highlight }) {
   }, [showAddNode]);
   return (
     <g
-      id={id}
+      id={item.id}
       ref={nodeRef}
       className='node-group'
+      fill={item.color}
       onMouseDown={handleOnNodeMouseDown}
       onClick={handleShow}
     >

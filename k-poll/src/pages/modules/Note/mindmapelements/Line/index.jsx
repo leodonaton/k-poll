@@ -20,9 +20,9 @@ export default function Line() {
     setLineElements(lines);
   },[mindmapelements])
 
-  useEffect(()=>{
-    console.log('lineElements updated', lineElements);
-  },[lineElements])
+  // useEffect(()=>{
+  //   console.log('lineElements updated', lineElements);
+  // },[lineElements])
   return (
     <div>
       

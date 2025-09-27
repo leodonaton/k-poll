@@ -13,7 +13,7 @@
     vertical-align: middle;
 }
 .sub-node-group{
-    fill: pink;
+    /* fill: pink; */
     opacity: 0.5;
     transition: all 0.2s;
     cursor: pointer;
