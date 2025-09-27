@@ -139,9 +139,46 @@ function layoutSubtree(node, finalX, finalY, elements) {
   });
 }
 
-  function adjustLevels(elements, rootId, rootY) {
+function adjustLevels(elements, rootId, rootY) {
+  const root = elements.find(el => el.id === rootId);
+  if (!root) return;
 
+  // 按层级分组
+  const levelMap = {};
+  function collect(node, depth) {
+    if (!levelMap[depth]) levelMap[depth] = [];
+    levelMap[depth].push(node);
+    if (node.childIds && node.childIds.length > 0) {
+      node.childIds.forEach(cid => {
+        const child = elements.find(el => el.id === cid);
+        if (child) collect(child, depth + 1);
+      });
+    }
   }
+  collect(root, 0);
+
+  // 遍历每一层，重新排布纵向位置
+  Object.keys(levelMap).forEach(depthStr => {
+    const depth = parseInt(depthStr);
+    const nodes = levelMap[depth];
+
+    if (nodes.length <= 1) return;
+
+    // 总高度 = 所有节点高度 + (n-1)*间距
+    const minGap = 60; // 最小间距（缩放前）
+    const totalHeight = nodes.reduce((sum, n) => sum + n.h, 0);
+    const availableHeight = totalHeight + (nodes.length - 1) * minGap;
+
+    // 层的中心线以 rootY 为基准
+    let startY = rootY - availableHeight / 2 + nodes[0].h / 2;
+
+    nodes.forEach(node => {
+      node.y = startY;
+      startY += node.h + minGap;
+    });
+  });
+}
+
 
   useEffect(() => {
     function handleMouseMove(e) {
@@ -180,12 +217,28 @@ function layoutSubtree(node, finalX, finalY, elements) {
         setHighlightId(null);
       }
     }
-    function handleMouseUp() {
+    function handleMouseUp(e) {
       setIsNodeDragging(false);
       if (highlightId) {
         const parent = mindmapelements.find(el => el.id === highlightId);
         if (parent) {
-          parent.childIds = Array.from(new Set([...parent.childIds, item.id]));
+          let svg = svgRef?.current || nodeRef.current?.ownerSVGElement;
+          let mouseY = 0;
+          if (svg && e) {
+            let pt = svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            let svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+            mouseY = svgP.y;
+          }
+          const parentCenterY = parent.y * scale + offset.y;
+          let newChildIds;
+          if (mouseY < parentCenterY) {
+            newChildIds = [item.id, ...parent.childIds.filter(cid => cid !== item.id)];
+          } else {
+            newChildIds = [...parent.childIds.filter(cid => cid !== item.id), item.id];
+          }
+          parent.childIds = newChildIds;
         }
         mindmapelements.find(el => el.id === item.id).fatherId = highlightId;
         // mindmapelements.find(el => el.id === item.id).x += 100 / scale;
@@ -199,7 +252,7 @@ function layoutSubtree(node, finalX, finalY, elements) {
     }
     if (isNodeDragging) {
       document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mouseup', handleMouseUp); 
     }
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
