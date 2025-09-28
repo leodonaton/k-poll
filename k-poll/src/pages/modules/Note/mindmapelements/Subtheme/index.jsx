@@ -12,6 +12,7 @@ export default function Subtheme({ item, scale, offset, svgRef }) {
   const [isNodeDragging, setIsNodeDragging] = useState(false)
   const [nodeoffset, setNodeoffset] = useState({ x: 0, y: 0 });
   const [showAddNode, setShowAddNode] = useState(false);
+  const [preFather, setPreFather] = useState(null);
   const nodeRef = useRef(null);
 
   // 计算缩放和偏移后的中心坐标
@@ -65,6 +66,7 @@ export default function Subtheme({ item, scale, offset, svgRef }) {
     });
     setIsNodeDragging(true);
     if (item.fatherId) {
+      setPreFather(mindmapelements.find(el => el.id === item.fatherId));
       mindmapelements.find(el => el.id === item.fatherId)
         .childIds = mindmapelements.find(
           el => el.id === item.fatherId
@@ -88,96 +90,60 @@ export default function Subtheme({ item, scale, offset, svgRef }) {
       });
     }
   }
-function moveSubtreeWhilemouseupAtrightPattern(nodeId, finalX, finalY, elements) {
-  const node = elements.find(el => el.id === nodeId);
-  if (!node) return;
+  function moveSubtreeWhilemouseupAtrightPattern(nodeId, finalX, finalY, elements) {
+    const node = elements.find(el => el.id === nodeId);
+    if (!node) return;
 
-  const father = elements.find(el => el.id === node.fatherId);
+    const father = elements.find(el => el.id === node.fatherId);
 
-  if (!father) {
-    layoutSubtree(node, finalX, finalY, elements);
-    adjustLevels(elements, nodeId, finalY);
-    return;
-  }
-  const siblings = father.childIds.map(cid => elements.find(el => el.id === cid)).filter(Boolean);
-  const count = siblings.length;
-  const totalHeight = siblings.reduce((sum, sib) => sum + sib.h, 0) + (count - 1) * 60 * scale;
-  let startY = father.y * scale + offset.y - totalHeight / 2 + siblings[0].h / 2;
-
-  siblings.forEach(sib => {
-    const parentRight = father.x * scale + offset.x + father.w / 2;
-    const sibNewX = (parentRight + 100 + sib.w / 2 - offset.x) / scale;
-    const sibNewY = (startY - offset.y) / scale;
-
-    layoutSubtree(sib, sibNewX, sibNewY, elements);
-
-    startY += sib.h + 60 * scale;
-  });
-
-  adjustLevels(elements, nodeId, finalY);
-}
-
-function layoutSubtree(node, finalX, finalY, elements) {
-  node.x = finalX;
-  node.y = finalY;
-
-  if (!node.childIds || node.childIds.length === 0) return;
-
-  const parentRight = finalX * scale + offset.x + node.w / 2;
-  const children = node.childIds.map(cid => elements.find(el => el.id === cid)).filter(Boolean);
-  const count = children.length;
-  const totalHeight = children.reduce((sum, child) => sum + child.h, 0) + (count - 1) * 60 * scale;
-  let startY = finalY * scale + offset.y - totalHeight / 2 + children[0].h / 2;
-
-  children.forEach(child => {
-    const childNewX = (parentRight + 100 + child.w / 2 - offset.x) / scale;
-    const childNewY = (startY - offset.y) / scale;
-
-    layoutSubtree(child, childNewX, childNewY, elements);
-
-    startY += child.h + 60 * scale;
-  });
-}
-
-function adjustLevels(elements, rootId, rootY) {
-  const root = elements.find(el => el.id === rootId);
-  if (!root) return;
-
-  // 按层级分组
-  const levelMap = {};
-  function collect(node, depth) {
-    if (!levelMap[depth]) levelMap[depth] = [];
-    levelMap[depth].push(node);
-    if (node.childIds && node.childIds.length > 0) {
-      node.childIds.forEach(cid => {
-        const child = elements.find(el => el.id === cid);
-        if (child) collect(child, depth + 1);
-      });
+    if (!father) {
+      layoutSubtree(node, finalX, finalY, elements);
+      adjustLevels(elements, nodeId, finalY);
+      return;
     }
-  }
-  collect(root, 0);
+    const siblings = father.childIds.map(cid => elements.find(el => el.id === cid)).filter(Boolean);
+    const count = siblings.length;
+    const totalHeight = siblings.reduce((sum, sib) => sum + sib.h, 0) + (count - 1) * 60 * scale;
+    let startY = father.y * scale + offset.y - totalHeight / 2 + siblings[0].h / 2;
 
-  // 遍历每一层，重新排布纵向位置
-  Object.keys(levelMap).forEach(depthStr => {
-    const depth = parseInt(depthStr);
-    const nodes = levelMap[depth];
+    siblings.forEach(sib => {
+      const parentRight = father.x * scale + offset.x + father.w / 2;
+      const sibNewX = (parentRight + 100 + sib.w / 2 - offset.x) / scale;
+      const sibNewY = (startY - offset.y) / scale;
 
-    if (nodes.length <= 1) return;
+      layoutSubtree(sib, sibNewX, sibNewY, elements);
 
-    // 总高度 = 所有节点高度 + (n-1)*间距
-    const minGap = 60; // 最小间距（缩放前）
-    const totalHeight = nodes.reduce((sum, n) => sum + n.h, 0);
-    const availableHeight = totalHeight + (nodes.length - 1) * minGap;
-
-    // 层的中心线以 rootY 为基准
-    let startY = rootY - availableHeight / 2 + nodes[0].h / 2;
-
-    nodes.forEach(node => {
-      node.y = startY;
-      startY += node.h + minGap;
+      startY += sib.h + 60 * scale;
     });
-  });
-}
+
+    adjustLevels(elements, nodeId, finalY);
+  }
+
+  function layoutSubtree(node, finalX, finalY, elements) {
+    node.x = finalX;
+    node.y = finalY;
+
+    if (!node.childIds || node.childIds.length === 0) return;
+
+    const parentRight = finalX * scale + offset.x + node.w / 2;
+    const children = node.childIds.map(cid => elements.find(el => el.id === cid)).filter(Boolean);
+    const count = children.length;
+    const totalHeight = children.reduce((sum, child) => sum + child.h, 0) + (count - 1) * 60 * scale;
+    let startY = finalY * scale + offset.y - totalHeight / 2 + children[0].h / 2;
+
+    children.forEach(child => {
+      const childNewX = (parentRight + 100 + child.w / 2 - offset.x) / scale;
+      const childNewY = (startY - offset.y) / scale;
+
+      layoutSubtree(child, childNewX, childNewY, elements);
+
+      startY += child.h + 60 * scale;
+    });
+  }
+
+  function adjustLevels(elements, rootId, rootY) {
+    null;
+  }
 
 
   useEffect(() => {
@@ -202,11 +168,11 @@ function adjustLevels(elements, rootId, rootY) {
       const foundElement = mindmapelements.find(el => {
         const el_x = el.x * scale + offset.x;
         const el_y = el.y * scale + offset.y;
-        if((el_x - el.w / 2 < x - item.w / 2 && el_x + el.w / 2 > x - item.w / 2) && (
+        if ((el_x - el.w / 2 < x - item.w / 2 && el_x + el.w / 2 > x - item.w / 2) && (
           el_y - el.h / 2 < y - item.h / 2 && el_y + el.h / 2 > y - item.h / 2 ||
           el_y - el.h / 2 < y + item.h / 2 && el_y + el.h / 2 > y + item.h / 2
         ))
-      return el
+          return el
       });
 
       // console.log('鼠标',e.clientX,e.clientY);
@@ -241,29 +207,41 @@ function adjustLevels(elements, rootId, rootY) {
           parent.childIds = newChildIds;
         }
         mindmapelements.find(el => el.id === item.id).fatherId = highlightId;
+        mindmapelements.find(el => el.id === item.id).layer = parent.layer + 1;
         // mindmapelements.find(el => el.id === item.id).x += 100 / scale;
         setMindmapelements([...mindmapelements]);
+
         const updatedElements = mindmapelements.map(el => ({ ...el }));
-        const finalX= parent.x + ((parent.w/2 + 100 + item.w/2)) / scale;
+        console.log('preFather:', preFather);
+        if (preFather && preFather.layer < parent.layer) {
+          const siblings = preFather.childIds.map(cid => updatedElements.find(el => el.id === cid)).filter(Boolean);
+          const count = siblings.length;
+          if (count > 0) {
+            const finalX = preFather.x + ((preFather.w / 2 + 100 + siblings[0].w / 2)) / scale;
+            moveSubtreeWhilemouseupAtrightPattern(siblings[0].id, finalX, preFather.y, updatedElements);
+            setMindmapelements(updatedElements);
+          }
+        }
+        const finalX = parent.x + ((parent.w / 2 + 100 + item.w / 2)) / scale;
         moveSubtreeWhilemouseupAtrightPattern(item.id, finalX, parent.y, updatedElements);
         setMindmapelements(updatedElements);
-        setHighlightId(null); 
+        setHighlightId(null);
       }
     }
     if (isNodeDragging) {
       document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp); 
+      document.addEventListener('mouseup', handleMouseUp);
     }
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     }
   }, [isNodeDragging, nodeoffset, scale, offset, mindmapelements, setMindmapelements, item.id, svgRef])
-  
+
   // useEffect(() => {
   //   console.log('highlightId changed:', highlightId);
   //   console.log('Current mindmapelements:', mindmapelements);
-  // }, [highlightId])
+  // }, [mindmapelements])
   // useEffect(() => {
   //   // console.log(mindmapelements);
   //   console.log('center-pos:', item.x*scale + offset.x, item.y*scale + offset.y);

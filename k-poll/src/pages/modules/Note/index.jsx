@@ -107,8 +107,8 @@ export default function Note() {
   const handleAddNode = (e, type = activefunctionbutton) => {
     if (e.target.tagName !== 'svg') return;
     const typeConfig = {
-      '主题': { label: '主题', text: '主题', childIds: [] },
-      '子主题': { label: '子主题', text: '子主题', fatherId: null, childIds: [] },
+      '主题': { label: '主题', text: '主题', layer: 0, childIds: [] },
+      '子主题': { label: '子主题', text: '子主题', layer:0,fatherId: null, childIds: [] },
       '关联': { label: '关联', text: '关联', connections: [] },
       '概要': { label: '概要', text: '概要', connections: [] }
     };
