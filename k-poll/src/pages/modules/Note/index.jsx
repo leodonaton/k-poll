@@ -5,7 +5,7 @@ import { CloseOutlined } from '@ant-design/icons'
 import Theme from './mindmapelements/Theme'
 import Subtheme from './mindmapelements/Subtheme'
 import Conection from './mindmapelements/Conection'
-import Line from './mindmapelements/line'
+import Line from './mindmapelements/Line'
 import Summary from './mindmapelements/Summary'
 import { NoteContext } from './NoteContext'
 export default function Note() {
@@ -26,6 +26,7 @@ export default function Note() {
   const dragStart = useRef({ x: 0, y: 0 })
   const offsetStart = useRef({ x: 0, y: 0 })
   const [highlightId, setHighlightId] = useState(null)
+  const [highlightpos, setHighlightpos] = useState(null)
 
   // 通知拖拽状态
   const notifyDragStatus = (status) => {
@@ -35,7 +36,7 @@ export default function Note() {
   // 鼠标按下左键进入拖拽
   const handleMouseDown = e => {
     if (e.button !== 0) return
-    const isSvg = e.target.tagName === 'svg'
+    const isSvg = e.target.tagName === 'svg' || e.target.tagName === 'rect'
     if (!isSvg) return
 
     setNotedragging(true)
@@ -203,7 +204,8 @@ export default function Note() {
     >
       <NoteContext.Provider value={{
         mindmapelements, setMindmapelements,
-        highlightId, setHighlightId
+        highlightId, setHighlightId,
+        highlightpos, setHighlightpos,
       }}>
         <button
           className='close-button'
@@ -246,7 +248,7 @@ export default function Note() {
             style={{ display: 'block', width: '100%', height: '100%' }}
             onClick={e => handleAddNode(e, activefunctionbutton)}
           >
-            <Line />
+            <Line scale={scale} offset={offset} />
             {mindmapelements.map((item, _) => (
               renderNodeByLabel(item, scale, offset)
             ))}

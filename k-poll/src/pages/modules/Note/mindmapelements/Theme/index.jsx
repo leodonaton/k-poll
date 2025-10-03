@@ -1,17 +1,17 @@
-import React, { useContext, useState,useRef,useEffect, use } from 'react'
+import React, { useContext, useState, useRef, useEffect, use } from 'react'
 import { NoteContext } from '../../NoteContext'
 import './index.css'
 import { PlusOutlined } from '@ant-design/icons'
 
 export default function Theme({ item, scale, offset, svgRef }) {
-  const { mindmapelements, setMindmapelements, highlightId } = useContext(NoteContext)
+  const { mindmapelements, setMindmapelements, highlightId, highlightpos } = useContext(NoteContext)
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(item.text)
   const [isNodeDragging, setIsNodeDragging] = useState(false);
-  const [nodeoffset, setNodeoffset] = useState({x:0,y:0});
+  const [nodeoffset, setNodeoffset] = useState({ x: 0, y: 0 });
   const [showAddNode, setShowAddNode] = useState(false);
   const nodeRef = useRef(null);
-  
+
   // 计算缩放和偏移后的中心坐标
   const x = item.x * scale + offset.x
   const y = item.y * scale + offset.y
@@ -77,33 +77,33 @@ export default function Theme({ item, scale, offset, svgRef }) {
       let newX = (svgP.x - nodeoffset.x - offset.x) / scale;
       let newY = (svgP.y - nodeoffset.y - offset.y) / scale;
       function moveSubtree(nodeId, dx, dy, elements) {
-          const node = elements.find(el => el.id === nodeId);
-          if (!node) return;
-          node.x += dx;
-          node.y += dy;
-          if (node.childIds && node.childIds.length > 0) {
-            node.childIds.forEach(cid => {
-              moveSubtree(cid, dx, dy, elements);
-            });
-          }
+        const node = elements.find(el => el.id === nodeId);
+        if (!node) return;
+        node.x += dx;
+        node.y += dy;
+        if (node.childIds && node.childIds.length > 0) {
+          node.childIds.forEach(cid => {
+            moveSubtree(cid, dx, dy, elements);
+          });
         }
+      }
 
-        const dx = newX - item.x;
-        const dy = newY - item.y;
-        // 复制数组，避免直接修改原状态
-        const updatedElements = mindmapelements.map(el => ({ ...el }));
-        moveSubtree(item.id, dx, dy, updatedElements);
+      const dx = newX - item.x;
+      const dy = newY - item.y;
+      // 复制数组，避免直接修改原状态
+      const updatedElements = mindmapelements.map(el => ({ ...el }));
+      moveSubtree(item.id, dx, dy, updatedElements);
 
-        setMindmapelements(updatedElements);
+      setMindmapelements(updatedElements);
     }
-    function handleMouseUp(){
+    function handleMouseUp() {
       setIsNodeDragging(false);
     }
-    if (isNodeDragging){
+    if (isNodeDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
-    return ()=>{
+    return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     }
@@ -171,7 +171,7 @@ export default function Theme({ item, scale, offset, svgRef }) {
         stroke="blue"
         strokeWidth={1.5 * scale}
         className='node-border'
-        style={showAddNode?{opacity:1}:{}}
+        style={showAddNode ? { opacity: 1 } : {}}
       />
       <foreignObject
         style={{ position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }}
@@ -231,36 +231,108 @@ export default function Theme({ item, scale, offset, svgRef }) {
         </div>
       </foreignObject>
       {showAddNode &&
-      <g
-      className='node-plus-group'
-      >
-      <circle 
-        cx={x + w / 2 + 15 * scale} 
-        cy={y} 
-        r={10 * scale} 
-        fill="none" 
-        stroke="white" 
-        strokeWidth={1 * scale} 
-        style={{ cursor: 'pointer' }} 
-      />
-      <foreignObject
-        x={x + w / 2 + 5 * scale}
-        y={y - 10 * scale}
-        width={20 * scale}
-        height={20 * scale}
-      >
-        <div style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <PlusOutlined style={{ color: 'white', fontSize: 16 * scale }} />
-        </div>
-      </foreignObject>
-    </g>
-}
+        <g
+          className='node-plus-group'
+        >
+          <circle
+            cx={x + w / 2 + 15 * scale}
+            cy={y}
+            r={10 * scale}
+            fill="none"
+            stroke="white"
+            strokeWidth={1 * scale}
+            style={{ cursor: 'pointer' }}
+          />
+          <foreignObject
+            x={x + w / 2 + 5 * scale}
+            y={y - 10 * scale}
+            width={20 * scale}
+            height={20 * scale}
+          >
+            <div style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <PlusOutlined style={{ color: 'white', fontSize: 16 * scale }} />
+            </div>
+          </foreignObject>
+        </g>
+      }
+      {
+        highlightId === item.id && highlightpos === 'top' &&
+        <g>
+          <path
+            d={`
+              M ${x} ${y - h / 2 }
+              C ${x + w / 2 - 36 * scale} ${y - h / 2 - 18 * scale},${x + w / 2 - 36 * scale} ${y - h / 2 - 18 * scale}, ${x + w / 2} ${y - h / 2 - 18 * scale}
+            `}
+            stroke="orange"
+            strokeWidth={2 * scale}
+            fill="none"
+          />
+          <rect
+            x={x + w / 2}
+            y={y - h / 2 - 22 * scale}
+            width={18 * scale}
+            height={8 * scale}
+            rx={3 * scale}
+            fill="orange"
+            stroke="orange"
+            strokeWidth={1 * scale}
+          />
+        </g>
+      }
+      {
+        highlightId === item.id && highlightpos === 'middle' &&
+        <g>
+          <path
+            d={`
+              M ${x + w / 2} ${y}
+              H ${x + w / 2 + 50 * scale}
+            `}
+            stroke="orange"
+            strokeWidth={2 * scale}
+            fill="none"
+          />
+          <rect
+            x={x + w / 2 + 30 * scale}
+            y={y - 4 * scale}
+            width={18 * scale}
+            height={8 * scale}
+            rx={3 * scale}
+            fill="orange"
+            stroke="orange"
+            strokeWidth={1 * scale}
+          />
+        </g>
+      }
+      {
+        highlightId === item.id && highlightpos === 'bottom' &&
+        <g>
+          <path
+            d={`
+              M ${x} ${y + h / 2 }
+              C ${x + w / 2 - 36 * scale} ${y + h / 2 + 18 * scale},${x + w / 2 - 36 * scale} ${y + h / 2 + 18 * scale}, ${x + w / 2} ${y + h / 2 + 18 * scale}
+            `}
+            stroke="orange"
+            strokeWidth={2 * scale}
+            fill="none"
+          />
+          <rect
+            x={x + w / 2}
+            y={y + h / 2 + 14 * scale}
+            width={18 * scale}
+            height={8 * scale}
+            rx={3 * scale}
+            fill="orange"
+            stroke="orange"
+            strokeWidth={1 * scale}
+          />
+        </g>
+      }
     </g>
   )
 }
